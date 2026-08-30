@@ -2,6 +2,7 @@
 
 # Get the absolute path of the script directory
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Explicitly map binaries where the native Makefiles output them
 MODULE_PATH="$ROOT_DIR/module/tty0tty.ko"
 PTS_BIN="$ROOT_DIR/pts/tty0tty"
 
@@ -18,31 +19,29 @@ fi
 
 echo "=== tty0tty Local Manager ==="
 
-# 1. Check and compile Kernel Module
+# 1. Check and compile Kernel Module (Cached evaluation)
 if [ ! -f "$MODULE_PATH" ]; then
     echo "[*] Kernel module not found. Compiling..."
-    # CONFIG_DEBUG_INFO_BTF=n suppresses the "Skipping BTF generation" message
-    # KCFLAGS="-w" completely silences any warning messages inside kernel sub-compilations
     cd "$ROOT_DIR/module" && make CONFIG_DEBUG_INFO_BTF=n KCFLAGS="-w"
     if [ $? -ne 0 ]; then
         echo "[-] Error: Failed to compile kernel module."
         exit 1
     fi
 else
-    echo "[+] Kernel module binary exists."
+    echo "[+] Kernel module binary exists (using cached build)."
 fi
 
-# 2. Check and compile PTS Utility
+# 2. Check and compile PTS Utility (Cached evaluation)
 if [ ! -f "$PTS_BIN" ]; then
     echo "[*] PTS utility not found. Compiling..."
-    # -Wno-unused-but-set-variable and -Wno-format silence the specific C file warnings
-    cd "$ROOT_DIR/pts" && gcc -Wall -O2 -D_GNU_SOURCE -Wno-unused-but-set-variable -Wno-format tty0tty.c -o tty0tty
+    # Using explicit -o flag ensures it drops exactly where $PTS_BIN expects it
+    cd "$ROOT_DIR/pts" && gcc -Wall -O2 -D_GNU_SOURCE -Wno-unused-but-set-variable -Wno-format tty0tty.c -o "$PTS_BIN"
     if [ $? -ne 0 ]; then
         echo "[-] Error: Failed to compile PTS utility."
         exit 1
     fi
 else
-    echo "[+] PTS utility binary exists."
+    echo "[+] PTS utility binary exists (using cached build)."
 fi
 
 # 3. Load the Kernel Module

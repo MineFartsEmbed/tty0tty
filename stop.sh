@@ -20,26 +20,4 @@ else
     echo "[+] Driver tty0tty is already stopped/unloaded."
 fi
 
-# 2. Handle optional deep cleaning of build artifacts
-if [ "$1" == "clean" ]; then
-    echo "[*] Cleaning up local precompiled binaries and artifacts..."
-    
-    # Clean user-space utilities
-    if [ -d "$ROOT_DIR/pts" ]; then
-        cd "$ROOT_DIR/pts" && make clean &>/dev/null
-        rm -f tty0tty
-    fi
-    if [ -d "$ROOT_DIR/ssniffer" ]; then
-        cd "$ROOT_DIR/ssniffer" && make clean &>/dev/null
-        rm -f ssniffer
-    fi
-    
-    # Clean kernel module artifacts
-    if [ -d "$ROOT_DIR/module" ]; then
-        cd "$ROOT_DIR/module" && make clean &>/dev/null
-    fi
-    
-    echo "[+] Workspace cleaned completely."
-fi
-
 echo "[+] Teardown complete."
