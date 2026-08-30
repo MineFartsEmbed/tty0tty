@@ -4,3 +4,19 @@ debian/*.log
 debian/*.debhelper
 debian/*.substvars
 debian/tty0tty-dkms/
+
+# Ignore compiled binaries and object files
+*.o
+*.ko
+*.mod
+*.mod.c
+*.cmd
+.tmp_versions/
+modules.order
+Module.symvers
+.tty0tty*
+
+# Ignore specific compiled executables
+pts/tty0tty
+ssniffer/ssniffer
+
