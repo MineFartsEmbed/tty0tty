@@ -21,7 +21,9 @@ echo "=== tty0tty Local Manager ==="
 # 1. Check and compile Kernel Module
 if [ ! -f "$MODULE_PATH" ]; then
     echo "[*] Kernel module not found. Compiling..."
-    cd "$ROOT_DIR/module" && make
+    # CONFIG_DEBUG_INFO_BTF=n suppresses the "Skipping BTF generation" message
+    # KCFLAGS="-w" completely silences any warning messages inside kernel sub-compilations
+    cd "$ROOT_DIR/module" && make CONFIG_DEBUG_INFO_BTF=n KCFLAGS="-w"
     if [ $? -ne 0 ]; then
         echo "[-] Error: Failed to compile kernel module."
         exit 1
@@ -33,7 +35,8 @@ fi
 # 2. Check and compile PTS Utility
 if [ ! -f "$PTS_BIN" ]; then
     echo "[*] PTS utility not found. Compiling..."
-    cd "$ROOT_DIR/pts" && make
+    # -Wno-unused-but-set-variable and -Wno-format silence the specific C file warnings
+    cd "$ROOT_DIR/pts" && gcc -Wall -O2 -D_GNU_SOURCE -Wno-unused-but-set-variable -Wno-format tty0tty.c -o tty0tty
     if [ $? -ne 0 ]; then
         echo "[-] Error: Failed to compile PTS utility."
         exit 1
